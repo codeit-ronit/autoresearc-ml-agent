@@ -1,0 +1,26 @@
+iteration	hypothesis	accuracy	status	commit_hash	peak_memory_mb	notes
+0	Baseline	0.8165	BASELINE		20.6	Initial run
+3	Reducing N_LAYERS from 2 to 1 will allow ~50% more optimizer steps in 300s, enab	0.8165	REVERTED		18.5	Δ=0.0000
+4	Replace constant LR (after warmup) with cosine decay to zero, using estimated ma	0.8119	REVERTED		20.6	Δ=-0.0046
+5	Setting LABEL_SMOOTHING from 0.0 to 0.1 will improve generalization by preventin	0.8131	REVERTED		20.6	Δ=-0.0034
+6	Reducing LEARNING_RATE from 2e-4 to 1e-4 will improve validation accuracy by ena	0.8131	REVERTED		20.6	Δ=-0.0034
+7	Reducing GRAD_CLIP from 1.0 to 0.5 will stabilize training and improve validatio	0.8188	COMMITTED	919cbdf	20.6	Δ=+0.0023 | GRAD_CLIP = 1.0→GRAD_CLIP = 0.5
+9	Reducing WARMUP_STEPS from 200 to 100 will allow the model to reach full learnin	0.8177	REVERTED		20.6	Δ=-0.0011
+10	Reducing N_LAYERS from 2 to 1 will allow ~2x more optimizer steps in 300s, reach	0.8016	REVERTED		18.5	Δ=-0.0172
+11	Replacing the constant post-warmup learning rate with cosine decay (to ~0 over ~	0.8108	REVERTED		20.6	Δ=-0.0080
+12	Adding label smoothing of 0.1 will improve validation accuracy by preventing ove	0.8062	REVERTED		20.6	Δ=-0.0126
+14	Reducing BATCH_SIZE from 32 to 16 will increase the number of optimi
+zer steps in	0.8222	COMMITTED	8c58f2e	34.1	Δ=+0.0034 | BATCH_SIZE = 32→BATCH_SIZE = 16
+19	Reducing LEARNING_RATE from 2e-4 to 1e-4 to match the halved batch size via line	0.8234	COMMITTED	4b92707	34.1	Δ=+0.0012 | LEARNING_RATE = 2e-4→LEARNING_RATE = 1e-4
+21	Reducing WARMUP_STEPS from 200 to 50 will im
+prove validation accuracy by allowin	0.8211	REVERTED		34.1	Δ=-0.0023
+32	Reducing WEIGHT_DECAY from 0.1 to 0.05 to restore the effective WD/LR ratio that	0.8154	REVERTED		34.1	Δ=-0.0080
+34	Increasing D_MODEL from 128 to 192 will improve validation accuracy by giving th	0.8154	REVERTED		32.9	Δ=-0.0080
+35	Replace mean pooling with a CLS token approach and add a two-layer classificatio	0.8119	REVERTED		20.9	Δ=-0.0115
+36	Replace AdamW optimizer with SGD with momentum and cosine annealing schedule to 	0.0000	CODE_FAILED		0.0	old_snippet not found in train.py
+37	Replace the linear warmup-then-constant LR schedule with a cosine annealing sche	0.8188	REVERTED		32.9	Δ=-0.0046
+38	Replace the single linear classification head with a bidirectional LSTM pooling 	0.0000	CODE_FAILED		0.0	old_snippet not found in train.py
+39	Add a lightweight convolutional feature extraction layer (kernel sizes 3,4,5) be	0.0000	CODE_FAILED		0.0	old_snippet not found in train.py
+40	Replace the single-head linear classifier with multi-head attention pooling (lea	0.0000	CODE_FAILED		0.0	old_snippet not found in train.py
+41	Add a 1D convolutional layer with kernel size 3 before the Transformer encoder t	0.0000	CODE_FAILED		0.0	old_snippet not found in train.py
+42	Add a learnable weighted combination of all encoder layer outputs (layer-wise at	0.0000	CODE_FAILED		0.0	old_snippet not found in train.py

@@ -1,0 +1,24 @@
+[project]
+name = "autoresearch"
+version = "0.1.0"
+description = "AutoResearch — Karpathy Loop for SST-2 Optimization using Claude claude-opus-4-6"
+requires-python = ">=3.10"
+dependencies = [
+    "anthropic>=0.40.0",
+    "datasets>=2.0.0",
+    "tokenizers>=0.15.0",
+    "torch>=2.0.0",
+    "numpy>=1.24.0",
+    "python-dotenv>=1.0.0",
+    "matplotlib>=3.7.0",
+    "runpod>=1.8.2",
+    "paramiko>=4.0.0",
+    "requests>=2.32.5",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+dev = []
