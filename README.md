@@ -349,10 +349,4 @@ This project implements the "Karpathy Loop" — the idea that LLMs can act as au
 
 ---
 
-## License
 
-MIT
-
----
-
-*Built with [Claude Opus](https://anthropic.com) by [Ronit Kumar](https://github.com/codeit-ronit)*
