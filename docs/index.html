@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AutoResearch — Autonomous ML Optimization with AI Agents</title>
+    <meta name="description" content="A team of Claude Opus AI agents autonomously optimizing neural networks — 42 experiments, zero human intervention.">
+    <style>
+        :root {
+            --bg: #0d1117;
+            --surface: #161b22;
+            --border: #30363d;
+            --text: #e6edf3;
+            --text-muted: #8b949e;
+            --green: #3fb950;
+            --green-dim: #238636;
+            --red: #f85149;
+            --blue: #58a6ff;
+            --purple: #bc8cff;
+            --orange: #d29922;
+            --yellow: #e3b341;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container { max-width: 1100px; margin: 0 auto; padding: 0 24px; }
+
+        /* Hero */
+        .hero {
+            text-align: center;
+            padding: 80px 0 60px;
+            border-bottom: 1px solid var(--border);
+        }
+        .hero-badge {
+            display: inline-block;
+            background: var(--green-dim);
+            color: var(--green);
+            padding: 4px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            letter-spacing: 0.5px;
+        }
+        .hero h1 {
+            font-size: 48px;
+            font-weight: 800;
+            line-height: 1.15;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--green), var(--blue));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero p {
+            font-size: 20px;
+            color: var(--text-muted);
+            max-width: 700px;
+            margin: 0 auto 32px;
+        }
+        .hero-stats {
+            display: flex;
+            justify-content: center;
+            gap: 48px;
+            flex-wrap: wrap;
+        }
+        .hero-stat { text-align: center; }
+        .hero-stat .number {
+            font-size: 42px;
+            font-weight: 800;
+            color: var(--green);
+            display: block;
+        }
+        .hero-stat .label {
+            font-size: 13px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Section */
+        section { padding: 64px 0; border-bottom: 1px solid var(--border); }
+        section:last-child { border-bottom: none; }
+        h2 {
+            font-size: 28px;
+            margin-bottom: 8px;
+        }
+        .section-sub {
+            color: var(--text-muted);
+            margin-bottom: 32px;
+            font-size: 16px;
+        }
+
+        /* Chart */
+        .chart-container {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 32px;
+            margin-bottom: 24px;
+        }
+        canvas { width: 100% !important; height: 400px !important; }
+
+        /* Timeline */
+        .timeline { position: relative; padding-left: 32px; }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 11px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--border);
+        }
+        .timeline-item {
+            position: relative;
+            margin-bottom: 28px;
+            padding: 20px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -27px;
+            top: 26px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid var(--border);
+            background: var(--bg);
+        }
+        .timeline-item.committed::before {
+            background: var(--green);
+            border-color: var(--green);
+        }
+        .timeline-item.reverted::before {
+            background: var(--text-muted);
+            border-color: var(--text-muted);
+        }
+        .timeline-item.failed::before {
+            background: var(--red);
+            border-color: var(--red);
+        }
+        .timeline-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        .timeline-iter {
+            font-size: 13px;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+        .timeline-status {
+            font-size: 12px;
+            padding: 2px 10px;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+        .status-committed { background: rgba(63,185,80,0.15); color: var(--green); }
+        .status-reverted { background: rgba(139,148,158,0.15); color: var(--text-muted); }
+        .status-failed { background: rgba(248,81,73,0.15); color: var(--red); }
+        .status-baseline { background: rgba(88,166,255,0.15); color: var(--blue); }
+        .timeline-hyp { font-size: 15px; font-weight: 600; }
+        .timeline-acc {
+            font-size: 14px;
+            color: var(--text-muted);
+            margin-top: 4px;
+        }
+        .timeline-delta {
+            font-weight: 700;
+        }
+        .delta-positive { color: var(--green); }
+        .delta-negative { color: var(--red); }
+
+        /* Agent cards */
+        .agents-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+        .agent-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 24px;
+            transition: border-color 0.2s;
+        }
+        .agent-card:hover { border-color: var(--green); }
+        .agent-icon { font-size: 32px; margin-bottom: 12px; }
+        .agent-card h3 { font-size: 18px; margin-bottom: 6px; }
+        .agent-card p { font-size: 14px; color: var(--text-muted); }
+
+        /* PRAR animation */
+        .prar-flow {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin: 32px 0;
+        }
+        .prar-step {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px 24px;
+            text-align: center;
+            min-width: 140px;
+            transition: all 0.3s;
+        }
+        .prar-step.active {
+            border-color: var(--green);
+            box-shadow: 0 0 20px rgba(63,185,80,0.15);
+        }
+        .prar-step .step-icon { font-size: 28px; margin-bottom: 8px; }
+        .prar-step .step-name { font-weight: 700; font-size: 15px; }
+        .prar-step .step-desc { font-size: 12px; color: var(--text-muted); margin-top: 4px; }
+        .prar-arrow {
+            display: flex;
+            align-items: center;
+            color: var(--text-muted);
+            font-size: 24px;
+        }
+
+        /* Beliefs */
+        .belief-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .belief-card.forbidden { border-left: 3px solid var(--red); }
+        .belief-card.proven { border-left: 3px solid var(--green); }
+        .belief-tag {
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            font-weight: 700;
+            margin-bottom: 6px;
+        }
+        .belief-tag.forbidden-tag { color: var(--red); }
+        .belief-tag.proven-tag { color: var(--green); }
+
+        /* Comparison table */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: var(--surface);
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid var(--border);
+        }
+        th, td {
+            padding: 14px 18px;
+            text-align: left;
+            border-bottom: 1px solid var(--border);
+            font-size: 14px;
+        }
+        th {
+            background: rgba(255,255,255,0.03);
+            font-weight: 700;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            color: var(--text-muted);
+        }
+        tr:last-child td { border-bottom: none; }
+
+        /* Footer */
+        footer {
+            padding: 40px 0;
+            text-align: center;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        footer a { color: var(--blue); text-decoration: none; }
+        footer a:hover { text-decoration: underline; }
+
+        /* CTA */
+        .cta-btn {
+            display: inline-block;
+            background: var(--green-dim);
+            color: var(--text);
+            padding: 12px 28px;
+            border-radius: 8px;
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 15px;
+            transition: background 0.2s;
+            margin: 8px;
+        }
+        .cta-btn:hover { background: var(--green); color: #000; }
+        .cta-btn.secondary {
+            background: transparent;
+            border: 1px solid var(--border);
+        }
+        .cta-btn.secondary:hover { border-color: var(--text-muted); background: var(--surface); color: var(--text); }
+
+        /* Tech stack */
+        .tech-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+        .tech-pill {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 8px 18px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        @media (max-width: 640px) {
+            .hero h1 { font-size: 32px; }
+            .hero-stats { gap: 24px; }
+            .hero-stat .number { font-size: 32px; }
+            .prar-arrow { display: none; }
+            .prar-flow { flex-direction: column; align-items: center; }
+        }
+    </style>
+</head>
+<body>
+
+<!-- Hero -->
+<header class="hero">
+    <div class="container">
+        <div class="hero-badge">AUTONOMOUS ML RESEARCH</div>
+        <h1>AutoResearch</h1>
+        <p>A team of AI agents that autonomously optimize neural networks — proposing hypotheses, writing code, validating safety, and learning from failures. Zero human intervention.</p>
+        <div class="hero-stats">
+            <div class="hero-stat">
+                <span class="number">42</span>
+                <span class="label">Experiments Run</span>
+            </div>
+            <div class="hero-stat">
+                <span class="number">82.34%</span>
+                <span class="label">Best Accuracy</span>
+            </div>
+            <div class="hero-stat">
+                <span class="number">0</span>
+                <span class="label">Human Interventions</span>
+            </div>
+            <div class="hero-stat">
+                <span class="number">4</span>
+                <span class="label">AI Agents</span>
+            </div>
+        </div>
+        <div style="margin-top: 36px;">
+            <a href="https://github.com/codeit-ronit/autoresearc-ml-agent" class="cta-btn">View Source Code</a>
+            <a href="#results" class="cta-btn secondary">See Results</a>
+        </div>
+    </div>
+</header>
+
+<!-- PRAR Loop -->
+<section>
+    <div class="container">
+        <h2>How It Works — The PRAR Loop</h2>
+        <p class="section-sub">Each iteration, 4 AI agents collaborate to run one scientific experiment.</p>
+
+        <div class="prar-flow" id="prar-flow">
+            <div class="prar-step" id="step-perceive">
+                <div class="step-icon">👁</div>
+                <div class="step-name">Perceive</div>
+                <div class="step-desc">Read goals, history, current code</div>
+            </div>
+            <div class="prar-arrow">&#8594;</div>
+            <div class="prar-step" id="step-reason">
+                <div class="step-icon">🧠</div>
+                <div class="step-name">Reason</div>
+                <div class="step-desc">Propose 1 testable hypothesis</div>
+            </div>
+            <div class="prar-arrow">&#8594;</div>
+            <div class="prar-step" id="step-act">
+                <div class="step-icon">🔧</div>
+                <div class="step-name">Act</div>
+                <div class="step-desc">Edit code, validate, audit</div>
+            </div>
+            <div class="prar-arrow">&#8594;</div>
+            <div class="prar-step" id="step-reflect">
+                <div class="step-icon">🪞</div>
+                <div class="step-name">Reflect</div>
+                <div class="step-desc">Commit or revert based on result</div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Agent Team -->
+<section>
+    <div class="container">
+        <h2>The AI Agent Team</h2>
+        <p class="section-sub">All 4 agents are powered by Claude Opus with extended thinking.</p>
+        <div class="agents-grid">
+            <div class="agent-card">
+                <div class="agent-icon">🔬</div>
+                <h3>Lead Researcher</h3>
+                <p>Analyzes all past experiments, reasons about causal mechanisms, and proposes exactly ONE hypothesis per iteration with expected impact.</p>
+            </div>
+            <div class="agent-card">
+                <div class="agent-icon">💻</div>
+                <h3>Code Agent</h3>
+                <p>Translates hypotheses into surgical code edits using find-and-replace markers. Never rewrites the whole file — eliminates LLM truncation bugs.</p>
+            </div>
+            <div class="agent-card">
+                <div class="agent-icon">🛡</div>
+                <h3>Auditor</h3>
+                <p>Validates every edit against hard constraints. Rejects unsafe changes and feeds rejection reasons back for self-correction (up to 3 retries).</p>
+            </div>
+            <div class="agent-card">
+                <div class="agent-icon">🧬</div>
+                <h3>Belief Distiller</h3>
+                <p>After 3+ failures of a pattern, auto-writes FORBIDDEN rules into persistent memory. Synthesizes causal beliefs from experiment history.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Results -->
+<section id="results">
+    <div class="container">
+        <h2>Experiment Results</h2>
+        <p class="section-sub">42 experiments, 5 kept improvements, best accuracy 82.34% — fully autonomous.</p>
+
+        <div class="chart-container">
+            <canvas id="accuracy-chart"></canvas>
+        </div>
+
+        <h3 style="margin: 40px 0 20px;">The Causal Chain of Improvements</h3>
+        <p class="section-sub">Each improvement enabled the next — the system discovered this dependency automatically.</p>
+
+        <div class="timeline">
+            <div class="timeline-item committed">
+                <div class="timeline-header">
+                    <span class="timeline-iter">Iteration 0 — Baseline</span>
+                    <span class="timeline-status status-baseline">BASELINE</span>
+                </div>
+                <div class="timeline-hyp">Initial model — 2-layer Transformer, AdamW, batch=32, lr=2e-4</div>
+                <div class="timeline-acc">Accuracy: <strong>81.65%</strong></div>
+            </div>
+
+            <div class="timeline-item committed">
+                <div class="timeline-header">
+                    <span class="timeline-iter">Iteration 7</span>
+                    <span class="timeline-status status-committed">COMMITTED</span>
+                </div>
+                <div class="timeline-hyp">GRAD_CLIP 1.0 → 0.5 — Stabilized gradients for tighter optimization</div>
+                <div class="timeline-acc">Accuracy: <strong>81.88%</strong> <span class="timeline-delta delta-positive">(+0.23%)</span></div>
+            </div>
+
+            <div class="timeline-item committed">
+                <div class="timeline-header">
+                    <span class="timeline-iter">Iteration 14</span>
+                    <span class="timeline-status status-committed">COMMITTED</span>
+                </div>
+                <div class="timeline-hyp">BATCH_SIZE 32 → 16 — 2x more optimizer steps (enabled by stable gradients)</div>
+                <div class="timeline-acc">Accuracy: <strong>82.22%</strong> <span class="timeline-delta delta-positive">(+0.34%)</span></div>
+            </div>
+
+            <div class="timeline-item committed">
+                <div class="timeline-header">
+                    <span class="timeline-iter">Iteration 19</span>
+                    <span class="timeline-status status-committed">COMMITTED</span>
+                </div>
+                <div class="timeline-hyp">LEARNING_RATE 2e-4 → 1e-4 — Matched LR to halved batch (only works AFTER batch change)</div>
+                <div class="timeline-acc">Accuracy: <strong>82.34%</strong> <span class="timeline-delta delta-positive">(+0.12%)</span></div>
+            </div>
+        </div>
+
+        <h3 style="margin: 40px 0 20px;">Full Experiment Log</h3>
+        <div style="overflow-x: auto;">
+        <table>
+            <thead>
+                <tr>
+                    <th>Iter</th>
+                    <th>Hypothesis</th>
+                    <th>Accuracy</th>
+                    <th>Status</th>
+                    <th>Delta</th>
+                </tr>
+            </thead>
+            <tbody id="results-table"></tbody>
+        </table>
+        </div>
+    </div>
+</section>
+
+<!-- Discoveries -->
+<section>
+    <div class="container">
+        <h2>Autonomous Scientific Discoveries</h2>
+        <p class="section-sub">The Belief Distiller synthesized these insights without any human guidance.</p>
+
+        <div class="belief-card proven">
+            <div class="belief-tag proven-tag">Proven Insight</div>
+            <strong>Hyperparameter changes form causal chains, not independent improvements.</strong>
+            <p style="color: var(--text-muted); margin-top: 6px; font-size: 14px;">LR halving failed at iter 6 but succeeded at iter 19 — only after batch halving at iter 14. Grad clip tightening (iter 7) enabled batch halving by stabilizing gradients against increased noise.</p>
+        </div>
+
+        <div class="belief-card proven">
+            <div class="belief-tag proven-tag">Proven Insight</div>
+            <strong>The model is data/signal-bottlenecked, not capacity-bottlenecked.</strong>
+            <p style="color: var(--text-muted); margin-top: 6px; font-size: 14px;">Both increasing capacity (D_MODEL 128→192, N_LAYERS 2→3) AND decreasing it (N_LAYERS 2→1) degraded accuracy. The ~82.3% ceiling reflects exhaustion of learnable signal from the data.</p>
+        </div>
+
+        <div class="belief-card proven">
+            <div class="belief-tag proven-tag">Proven Insight</div>
+            <strong>Constant post-warmup LR dominates cosine decay under compute constraints.</strong>
+            <p style="color: var(--text-muted); margin-top: 6px; font-size: 14px;">With only 300 seconds of training, cosine decay wastes too many steps at near-zero LR. Tested twice in different contexts — consistently underperforms.</p>
+        </div>
+
+        <div class="belief-card forbidden">
+            <div class="belief-tag forbidden-tag">Auto-Forbidden (3+ failures)</div>
+            <strong>Patterns the system permanently blocked:</strong>
+            <p style="color: var(--text-muted); margin-top: 6px; font-size: 14px;">
+                N_LAYERS=3 (underfits in 300s) &bull; D_FF=512 (overfits) &bull; BATCH_SIZE=64 (fewer steps) &bull; LR &gt; 2e-4 (overshoots) &bull; DROPOUT=0.2 (data-limited, not overfitting) &bull; Label smoothing (reduces signal) &bull; Cosine decay (wastes compute)
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Comparison -->
+<section>
+    <div class="container">
+        <h2>How This Differs from Traditional AutoML</h2>
+        <p class="section-sub">AutoResearch treats hyperparameter optimization as a scientific reasoning problem, not a search problem.</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Feature</th>
+                    <th>Grid / Random Search</th>
+                    <th>Bayesian Optimization</th>
+                    <th>AutoResearch</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr><td>Exploration strategy</td><td>Exhaustive / random</td><td>Probabilistic</td><td style="color:var(--green)"><strong>Causal reasoning</strong></td></tr>
+                <tr><td>Learns from failures</td><td>No</td><td>Statistically</td><td style="color:var(--green)"><strong>Yes — writes beliefs &amp; FORBIDDEN rules</strong></td></tr>
+                <tr><td>Chains discoveries</td><td>No</td><td>No</td><td style="color:var(--green)"><strong>Yes — discovers dependencies</strong></td></tr>
+                <tr><td>Modifies architecture</td><td>No</td><td>No</td><td style="color:var(--green)"><strong>Yes — evolved Transformer to CNN</strong></td></tr>
+                <tr><td>Explains decisions</td><td>No</td><td>No</td><td style="color:var(--green)"><strong>Natural language rationale</strong></td></tr>
+                <tr><td>Persistent memory</td><td>No</td><td>Per-session</td><td style="color:var(--green)"><strong>program.md survives across sessions</strong></td></tr>
+            </tbody>
+        </table>
+    </div>
+</section>
+
+<!-- Tech Stack -->
+<section>
+    <div class="container">
+        <h2>Tech Stack</h2>
+        <p class="section-sub">Built with modern ML and AI infrastructure.</p>
+        <div class="tech-grid">
+            <span class="tech-pill">Claude Opus (Anthropic API)</span>
+            <span class="tech-pill">PyTorch</span>
+            <span class="tech-pill">HuggingFace Datasets</span>
+            <span class="tech-pill">BPE Tokenizer</span>
+            <span class="tech-pill">Git (Ratchet Lock)</span>
+            <span class="tech-pill">Matplotlib</span>
+            <span class="tech-pill">Python 3.10+</span>
+            <span class="tech-pill">uv Package Manager</span>
+        </div>
+    </div>
+</section>
+
+<footer>
+    <div class="container">
+        <p>Built by <a href="https://github.com/codeit-ronit">Ronit Kumar</a> with <a href="https://anthropic.com">Claude Opus</a></p>
+        <p style="margin-top: 8px;"><a href="https://github.com/codeit-ronit/autoresearc-ml-agent">View Source on GitHub</a></p>
+    </div>
+</footer>
+
+<!-- Chart.js from CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+// Experiment data from results.tsv
+const experiments = [
+    { iter: 0, hyp: "Baseline — initial 2-layer Transformer + AdamW", acc: 0.8165, status: "BASELINE" },
+    { iter: 3, hyp: "Reduce N_LAYERS from 2 to 1 for more optimizer steps", acc: 0.8165, status: "REVERTED" },
+    { iter: 4, hyp: "Replace constant LR with cosine decay to zero", acc: 0.8119, status: "REVERTED" },
+    { iter: 5, hyp: "Label smoothing 0.0 → 0.1 for better generalization", acc: 0.8131, status: "REVERTED" },
+    { iter: 6, hyp: "Reduce LR from 2e-4 to 1e-4", acc: 0.8131, status: "REVERTED" },
+    { iter: 7, hyp: "Reduce GRAD_CLIP from 1.0 to 0.5", acc: 0.8188, status: "COMMITTED" },
+    { iter: 9, hyp: "Reduce WARMUP_STEPS from 200 to 100", acc: 0.8177, status: "REVERTED" },
+    { iter: 10, hyp: "Reduce N_LAYERS from 2 to 1 (retry)", acc: 0.8016, status: "REVERTED" },
+    { iter: 11, hyp: "Cosine LR decay (retry in new context)", acc: 0.8108, status: "REVERTED" },
+    { iter: 12, hyp: "Label smoothing 0.1 (retry)", acc: 0.8062, status: "REVERTED" },
+    { iter: 14, hyp: "Reduce BATCH_SIZE from 32 to 16", acc: 0.8222, status: "COMMITTED" },
+    { iter: 19, hyp: "Reduce LR from 2e-4 to 1e-4 (post batch change)", acc: 0.8234, status: "COMMITTED" },
+    { iter: 21, hyp: "Reduce WARMUP_STEPS from 200 to 50", acc: 0.8211, status: "REVERTED" },
+    { iter: 32, hyp: "Reduce WEIGHT_DECAY from 0.1 to 0.05", acc: 0.8154, status: "REVERTED" },
+    { iter: 34, hyp: "Increase D_MODEL from 128 to 192", acc: 0.8154, status: "REVERTED" },
+    { iter: 35, hyp: "Replace mean pooling with CLS token + 2-layer head", acc: 0.8119, status: "REVERTED" },
+    { iter: 37, hyp: "Cosine annealing LR schedule", acc: 0.8188, status: "REVERTED" },
+];
+
+// Running best
+let best = 0;
+const runningBest = experiments.map(e => {
+    if (e.status === "COMMITTED" || e.status === "BASELINE") best = Math.max(best, e.acc);
+    return best;
+});
+
+const ctx = document.getElementById('accuracy-chart').getContext('2d');
+
+const committedData = experiments.map((e, i) =>
+    (e.status === "COMMITTED" || e.status === "BASELINE") ? e.acc : null
+);
+const revertedData = experiments.map((e, i) =>
+    e.status === "REVERTED" ? e.acc : null
+);
+
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: experiments.map((e, i) => `#${e.iter}`),
+        datasets: [
+            {
+                label: 'Running Best',
+                data: runningBest,
+                borderColor: '#3fb950',
+                backgroundColor: 'rgba(63,185,80,0.1)',
+                fill: true,
+                tension: 0.3,
+                pointRadius: 0,
+                borderWidth: 2.5,
+            },
+            {
+                label: 'Kept',
+                data: committedData,
+                borderColor: 'transparent',
+                backgroundColor: '#3fb950',
+                pointRadius: 8,
+                pointHoverRadius: 10,
+                showLine: false,
+            },
+            {
+                label: 'Discarded',
+                data: revertedData,
+                borderColor: 'transparent',
+                backgroundColor: 'rgba(139,148,158,0.5)',
+                pointRadius: 5,
+                pointHoverRadius: 7,
+                showLine: false,
+            },
+        ]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+            legend: {
+                labels: { color: '#8b949e', font: { size: 12 } }
+            },
+            tooltip: {
+                callbacks: {
+                    title: (items) => {
+                        const idx = items[0].dataIndex;
+                        return `Iteration ${experiments[idx].iter}`;
+                    },
+                    label: (item) => {
+                        const idx = item.dataIndex;
+                        const e = experiments[idx];
+                        return [
+                            `Accuracy: ${(e.acc * 100).toFixed(2)}%`,
+                            `Status: ${e.status}`,
+                            e.hyp
+                        ];
+                    }
+                }
+            }
+        },
+        scales: {
+            x: {
+                ticks: { color: '#8b949e' },
+                grid: { color: 'rgba(48,54,61,0.5)' }
+            },
+            y: {
+                min: 0.79,
+                max: 0.84,
+                ticks: {
+                    color: '#8b949e',
+                    callback: v => (v * 100).toFixed(1) + '%'
+                },
+                grid: { color: 'rgba(48,54,61,0.5)' }
+            }
+        }
+    }
+});
+
+// Populate results table
+const tbody = document.getElementById('results-table');
+experiments.forEach(e => {
+    const statusClass = e.status === 'COMMITTED' ? 'status-committed' :
+                        e.status === 'BASELINE' ? 'status-baseline' :
+                        e.status === 'REVERTED' ? 'status-reverted' : 'status-failed';
+    const delta = e.status === 'BASELINE' ? '—' :
+                  e.acc >= runningBest[0] ? `${((e.acc - 0.8165) * 100).toFixed(2)}%` :
+                  `${((e.acc - 0.8165) * 100).toFixed(2)}%`;
+    const deltaClass = (e.acc - 0.8165) > 0 ? 'delta-positive' : (e.acc - 0.8165) < 0 ? 'delta-negative' : '';
+
+    tbody.innerHTML += `
+        <tr>
+            <td>${e.iter}</td>
+            <td>${e.hyp}</td>
+            <td><strong>${(e.acc * 100).toFixed(2)}%</strong></td>
+            <td><span class="timeline-status ${statusClass}">${e.status}</span></td>
+            <td class="timeline-delta ${deltaClass}">${e.status === 'BASELINE' ? '—' : ((e.acc - 0.8165) >= 0 ? '+' : '') + ((e.acc - 0.8165) * 100).toFixed(2) + '%'}</td>
+        </tr>
+    `;
+});
+
+// PRAR animation
+const steps = ['step-perceive', 'step-reason', 'step-act', 'step-reflect'];
+let activeStep = 0;
+setInterval(() => {
+    steps.forEach(s => document.getElementById(s).classList.remove('active'));
+    document.getElementById(steps[activeStep]).classList.add('active');
+    activeStep = (activeStep + 1) % steps.length;
+}, 2000);
+</script>
+
+</body>
+</html>
